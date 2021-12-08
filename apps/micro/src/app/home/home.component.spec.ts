@@ -25,8 +25,8 @@ describe('HomeComponent', () => {
   });
 
   it('should call updateWidgets and getTotalPrice on reCalculateTotal', () => {
-    spyOn(component, 'updateWidgets').and.callThrough();
-    spyOn(component, 'getTotalPrice').and.callThrough();
+    spyOn(component, 'modifyWidgets').and.callThrough();
+    spyOn(component, 'getTotalPriceOfWidgets').and.callThrough();
 
     const mockMode = 'create';
     const mockWidgets = [];
@@ -34,54 +34,54 @@ describe('HomeComponent', () => {
 
     component.reCalculateTotal(mockMode, mockWidgets, mockWidget);
 
-    expect(component.updateWidgets).toHaveBeenCalledWith(
+    expect(component.modifyWidgets).toHaveBeenCalledWith(
       mockMode,
       mockWidgets,
       mockWidget
     );
-    expect(component.getTotalPrice).toHaveBeenCalled();
+    expect(component.getTotalPriceOfWidgets).toHaveBeenCalled();
   });
 
   it('should call the appropriate method depending on mode in updateWidgets', () => {
     const mockWidget = { id: '1', title: 'mock', description: 'mock', price: 100 };
 
-    spyOn(component, 'addWidget').and.callThrough();
+    spyOn(component, 'appendWidget').and.callThrough();
     spyOn(component, 'updateWidget').and.callThrough();
     spyOn(component, 'deleteWidget').and.callThrough();
 
-    component.updateWidgets('create', [], mockWidget);
-    expect(component.addWidget).toHaveBeenCalledWith([], mockWidget);
+    component.modifyWidgets('create', [], mockWidget);
+    expect(component.appendWidget).toHaveBeenCalledWith([], mockWidget);
 
-    component.updateWidgets('update', [], mockWidget);
+    component.modifyWidgets('update', [], mockWidget);
     expect(component.updateWidget).toHaveBeenCalledWith([], mockWidget);
 
-    component.updateWidgets('delete', [], mockWidget);
+    component.modifyWidgets('delete', [], mockWidget);
     expect(component.deleteWidget).toHaveBeenCalledWith([], mockWidget);
   });
 
   it('should add a widget on addWidget', () => {
     let widgets = [];
-    const widget = {
+    const widget: Widget = {
       id: null,
-      name: 'new item',
+      title: 'new item',
       description: 'new item',
       price: 100,
     };
 
     expect(widgets.length).toBe(0);
 
-    widgets = component.addWidget(widgets, widget);
+    widgets = component.appendWidget(widgets, widget);
 
     expect(widgets.length).toBe(1);
   });
 
   it('should update a widget on updateWidget', () => {
-    let widgets = [
-      { id: 100, name: 'new item', description: 'new item', price: 100 },
+    let widgets: Widget[] = [
+      { id: '100', title: 'new item', description: 'new item', price: 100 },
     ];
-    const widget = {
-      id: 100,
-      name: 'UPDATED',
+    const widget: Widget = {
+      id: '100',
+      title: 'UPDATED',
       description: 'WIDGET',
       price: 100,
     };
@@ -92,12 +92,12 @@ describe('HomeComponent', () => {
   });
 
   it('should delete a widget on deleteWidget', () => {
-    let widgets = [
-      { id: 100, name: 'new item', description: 'new item', price: 100 },
+    let widgets: Widget[] = [
+      { id: '100', title: 'new item', description: 'new item', price: 100 },
     ];
-    const widget = {
-      id: 100,
-      name: 'new item',
+    const widget: Widget = {
+      id: '100',
+      title: 'new item',
       description: 'new item',
       price: 100,
     };
@@ -116,7 +116,7 @@ describe('HomeComponent', () => {
       { id: '3', title: 'mock', description: 'mock', price: 300 },
     ];
 
-    const total = component.getTotalPrice(widgets);
+    const total = component.getTotalPriceOfWidgets(widgets);
 
     expect(total).toBe(600);
   });

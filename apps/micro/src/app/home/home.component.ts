@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { Widget } from '@fem/api-interfaces';
 import { v4 as uuidv4 } from 'uuid';
 
+type Modes = 'create' | 'update' | 'delete';
+
 @Component({
   selector: 'fem-home',
   templateUrl: './home.component.html',
@@ -9,26 +11,47 @@ import { v4 as uuidv4 } from 'uuid';
 })
 export class HomeComponent {
   price;
-  mode;
+  mode: Modes;
   widgets: Widget[];
 
-  updateWidgetsAndRecalculateCost(widget: Widget) {
-    switch (this.mode) {
-      case 'create':
-        const newWidget = Object.assign({}, widget, { id: uuidv4() });
-        this.widgets = [...this.widgets, newWidget];
-        break;
-      case 'update':
-        this.widgets = this.widgets.map(_widget => widget.id === _widget.id
-          ? Object.assign({}, widget) : _widget);
-        break;
-      case 'delete':
-        this.widgets = this.widgets.filter(_widget => widget.id !== _widget.id);
-        break;
-      default:
-        break;
-    }
-    return this.widgets.reduce((acc, curr) => acc + curr.price, 0);
+  reCalculateTotal(mode: Modes, widgets: Widget[], widgetToModify: Widget): void {
+    this.widgets = this.modifyWidgets(mode, widgets, widgetToModify);
+    this.price = this.getTotalPriceOfWidgets(widgets);
   }
 
+  modifyWidgets(mode: Modes, widgets: Widget[], widgetToModify: Widget): Widget[] | never {
+    switch (mode) {
+      case 'create':
+        return this.appendWidget(widgets, widgetToModify);
+      case 'update':
+        return this.updateWidget(widgets, widgetToModify);
+      case 'delete':
+        return this.deleteWidget(widgets, widgetToModify);
+      default:
+        throw new TypeError(`Mode: ${mode} is not supported by this method`);
+    }
+  }
+
+  getTotalPriceOfWidgets(currentWidgets: Widget[]): number {
+    return currentWidgets.reduce((acc, curr) => acc + curr.price, 0);
+  }
+
+  appendWidget(currentWidgets: Widget[], newWidgetData: Widget): Widget[] {
+    const newWidget = Object.assign({}, newWidgetData, { id: uuidv4() });
+    return [...currentWidgets, newWidget];
+  }
+
+  updateWidget(currentWidgets: Widget[], updatedWidgetData: Widget): Widget[] {
+    return currentWidgets.map((currentWidget) =>
+      updatedWidgetData.id === currentWidget.id
+        ? Object.assign({}, updatedWidgetData)
+        : currentWidget
+    );
+  }
+
+  deleteWidget(currentWidgets: Widget[], widgetToDelete: Widget): Widget[] {
+    return currentWidgets.filter(
+      (__widget) => widgetToDelete.id !== __widget.id
+    );
+  }
 }
